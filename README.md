@@ -30,6 +30,7 @@ You have the choice between 2 methods:
 Note: Plugin folder is case-sensitive.
 
 Add a crontab with this line:
+
 	* * * * *  /path/to/kanboard/plugins/Imap/cron.php /path/to/kanboad/data/db.sqlite
 
 Configuration
