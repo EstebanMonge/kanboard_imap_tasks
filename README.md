@@ -28,3 +28,19 @@ You have the choice between 2 methods:
 2. Clone this repository into the folder `plugins/Imap`
 
 Note: Plugin folder is case-sensitive.
+
+Add a crontab with this line:
+	* * * * *  /path/to/kanboard/plugins/Imap/cron.php /path/to/kanboad/data/db.sqlite
+
+Configuration
+-------------
+
+Go to Kanboard -> Settings -> Integrations
+Go to Kanboard -> Project -> Menu -> Settings -> Edit project and add a Identifier
+
+Testing
+-------
+
+You can send a email with this format happykanboard+PROJECTIDENTIFIER@riseup.net put a subject that will be the task title and details in the email body that will be the task content.
+
+You can also send a email with this format in subject: Finish Duke Nukem Forever 2 <PROJECTIDENTIFIER> please! Finish Duke Nukem Forever 2 please! will be the title and details in the email body that will be the task content.
