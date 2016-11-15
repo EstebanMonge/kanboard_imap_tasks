@@ -26,7 +26,8 @@ You have the choice between 2 methods:
 
 1. Download the zip file and decompress everything under the directory `plugins/Imap`
 2. Clone this repository into the folder `plugins/Imap`
-3. Add a crontab with this line:
+
+Finally add a crontab with this line:
 
 	* * * * *  /path/to/kanboard/plugins/Imap/cron.php /path/to/kanboad/data/db.sqlite
 
