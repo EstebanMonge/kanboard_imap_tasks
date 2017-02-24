@@ -7,4 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'JsonRPC' => array($vendorDir . '/fguillot/json-rpc/src'),
+    'Fetch' => array($vendorDir . '/tedivm/fetch/src'),
 );

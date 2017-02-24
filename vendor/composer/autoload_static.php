@@ -14,6 +14,13 @@ class ComposerStaticInit3ae4b3fce9460942cfa4cb3349a9f36d
                 0 => __DIR__ . '/..' . '/fguillot/json-rpc/src',
             ),
         ),
+        'F' => 
+        array (
+            'Fetch' => 
+            array (
+                0 => __DIR__ . '/..' . '/tedivm/fetch/src',
+            ),
+        ),
     );
 
     public static function getInitializer(ClassLoader $loader)

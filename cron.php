@@ -2,11 +2,15 @@
 <?php
 require('vendor/autoload.php');
 use JsonRPC\Client;
+use Fetch\Server;
+use Fetch\Message;
+
 $projects = array();
 $users = array();
 $tasks = array();
 $jsonrpc_auth_name = "jsonrpc";
-
+$toaddress="";
+$ccaddress="";
 
 if ( isset($argv[1]) ) {
 	$database=$argv[1];
@@ -53,86 +57,101 @@ if ( isset($argv[1]) ) {
 			$projects[$proj['identifier']]['id'] = $proj['id'];
 		}
 	}
-	$hostname='{'.$imap_server.':'.$imap_server_port.'/imap/ssl}INBOX';
-	$mbox = imap_open("$hostname", "$imap_username", "$imap_password");
-	if (!$mbox) {
-		echo imap_last_error();
-		exit;
-	}
-	$emails = imap_search($mbox,'UNSEEN');
-	if ( $emails) {
-		rsort($emails);
-		foreach($emails as $email_number) {
-			$header = imap_header($mbox, $email_number);
-			$body_text = strip_tags(quoted_printable_decode(imap_fetchbody($mbox, $email_number,'1')));
-			$task_id=preg_replace('/.*We created Task ID#/','',imap_utf8($header->subject));
-			$to=$header->from[0]->mailbox.'@'.$header->from[0]->host;
+	$server = new Server($imap_server,993);
+	$server->setAuthentication($imap_username, $imap_password);
+	$messages = $server->search('UNSEEN');
+		foreach ($messages as $message) {
+			$body_text=$message->getMessageBody();
+                        preg_match('~TaskID#\[(.*?)\]~', $message->getSubject(), $output);
+			$task_id = $output[1];
+			$to = $message->getAddresses("to"); 
+			$cc = $message->getAddresses("cc");
+			$from = $message->getAddresses("from");
+			$header=$message->getHeaders();
+			echo $header->message_id;
+			if (!isset($cc)) {
+				foreach ($cc as $ccfor) {
+					if ( "$imap_username" != $ccfor['address'] ) {
+						$ccaddress .= $ccfor['address'].",";
+					}
+				}
+			}
+			$ccaddress=substr_replace($ccaddress, "", -1);
+			foreach ($to as $tofor) {
+				if ( "$imap_username" != $tofor['address'] ) {
+					$toaddress .= $tofor['address'].",";
+				}
+			}
+			$toaddress=substr_replace($toaddress, "", -1);
 			if ( $client->getTask($task_id) ) {
 				$comment['content']="";
 				$comment['task_id']=$task_id;
 				$comment['user_id'] = "none"; 
         			foreach ($users_tmp as $user) {
-                			if ( strtolower($user['email']) == strtolower($to) ){
+                			if ( strtolower($user['email']) == $to ){
                         			$comment['user_id'] = $user['id'];
                 			}
         			}
 				if ( $comment['user_id']=="none" && $imap_guest_user_id != "" ) {
 					$comment['user_id'] = $imap_guest_user_id;
-					$comment['content'].="From: ".$to."\r\n";
-				} 
+					$comment['content'].="From: ".$from['address']."\r\n";
+				}
 				$comment['content'].=$body_text;
 				$response=$client->createComment($comment);	
 			}
 			else {
-				if (strpos($header->to[0]->mailbox,$mail_prefix) !== false){
-					$project_identifier = str_replace($mail_prefix,'',$header->to[0]->mailbox);
-					if (isset($projects[$project_identifier])) {
-					        $task['project_id'] = $projects[$project_identifier]['id'];
-						$task['title'] = imap_utf8($header->subject);
-						$task['description'] = $body_text;
-						$task_id = $client->createTask($task);
-						$subject = 'We created Task ID#'.$task_id;
-						$body = 'You can track on Kanboard your request with the Task ID# '.$task_id;
-						$headers = 'MIME-Version: 1.0' . "\r\n";
-						$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-						$headers .= 'From: '.$imap_username. "\r\n" .
-		        	                'Reply-To:  <'.$header->to[0]->mailbox.'@'.$header->to[0]->host.'>'. "\r\n" .
-		                	        'Subject: '.$subject."\r\n".
-		                        	'To: '.$to."\r\n".
-			                        'In-Reply-To: <'.$header->message_id.'>'. "\r\n" .
-			                        'References: <'.$header->message_id.'>'. "\r\n" .
-			                        'X-Mailer: PHP/' . phpversion();
-						mail($to,$subject,$body,$headers);
+				if (strpos($to[0]['address'],$mail_prefix) !== false){
+					$project_identifier = str_replace($mail_prefix,'',$to[0]['address']);
+					$project_identifier = strstr($project_identifier, '@', true);
+					if (isset($projects[strtoupper($project_identifier)])) {
+					        $task['project_id'] = $projects[strtoupper($project_identifier)]['id'];
 					}
 				}
 				else {
-					        preg_match('~<(.*?)>~', $header->subject, $output);
+					        preg_match('~<(.*?)>~', $message->getSubject(), $output);
                                                	$project_identifier = $output[1];
-	                                        if (isset($projects[$project_identifier])) {
-	                                                $task['project_id'] = $projects[$project_identifier]['id'];
-        	                                        $task['title'] = str_replace("<".$project_identifier.">","",imap_utf8($header->subject));
-                	                                $task['description'] = $body_text;
-                        	                        $task_id = $client->createTask($task);
-                                	                $subject = 'We created Task ID#'.$task_id;
-                                        	        $body = 'You can track on Kanboard your request with the Task ID# '.$task_id;
-                                                	$headers = 'MIME-Version: 1.0' . "\r\n";
-	                                                $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-        	                                        $headers .= 'From: '.$imap_username. "\r\n" .
-                	                                'Reply-To:  <'.$header->to[0]->mailbox.'@'.$header->to[0]->host.'>'. "\r\n" .
-                        	                        'Subject: '.$subject."\r\n".
-                                	                'To: '.$to."\r\n".
-                                        	        'In-Reply-To: <'.$header->message_id.'>'. "\r\n" .
-                                                	'References: <'.$header->message_id.'>'. "\r\n" .
-	                                                'X-Mailer: PHP/' . phpversion();
-        	                                        mail($to,$subject,$body,$headers);
+	                                        if (isset($projects[strtoupper($project_identifier)])) {
+	                                                $task['project_id'] = $projects[strtoupper($project_identifier)]['id'];
+#                                	                $subject = 'We created Task ID#'.$task_id;
+#                                        	        $body = 'You can track on Kanboard your request with the Task ID# '.$task_id;
+#                                                	$headers = 'MIME-Version: 1.0' . "\r\n";
+#	                                                $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+#        	                                        $headers .= 'From: '.$imap_username. "\r\n" .
+#                	                                'Reply-To:  <'.$header->to[0]->mailbox.'@'.$header->to[0]->host.'>'. "\r\n" .
+#                        	                        'Subject: '.$subject."\r\n".
+#                                	                'To: '.$to.','.$toaddress."\r\n".
+#		                        		'CC: '.$ccaddress."\r\n".
+#                                        	        'In-Reply-To: <'.$header->message_id.'>'. "\r\n" .
+#                                                	'References: <'.$header->message_id.'>'. "\r\n" .
+#	                                                'X-Mailer: PHP/' . phpversion();
+#        	                                        mail($toaddress,$subject,$body,$headers);
 					}
 				}
-			}
+                                $task['title'] = str_replace("<$project_identifier>",'',$message->getSubject());
+                                $task['description'] = $body_text;
+                                $task_id = $client->createTask($task);
+
+                                                       $subject = "Re: ".$message->getSubject()." TaskID#[".$task_id."]";
+                                                       $body = 'You can track on Kanboard your request with the Task ID# '.$task_id;
+                                                       $headers = 'MIME-Version: 1.0' . "\r\n";
+                                                       $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+                                                       $headers .= 'From: '.$imap_username. "\r\n" .
+                                                       'Reply-To:  <'.$imap_username.'>'. "\r\n" .
+                                                       'Subject: '.$subject."\r\n".
+                                                       'To: '.$from['address']."\r\n".
+                                                       'CC: '.$toaddress.','.$ccaddress."\r\n".
+                                                       'In-Reply-To: <'.$header->message_id.'>'. "\r\n" .
+                                                       'References: <'.$header->message_id.'>'. "\r\n" .
+                                                       'X-Mailer: PHP/' . phpversion();
+                                                       mail($toaddress,$subject,$body,$headers);			}
 		}
 	}
-}
+#}
 else
 {
 	echo "You must specify the database path\n";
+}
+function stripAccents($str) {
+    return strtr(utf8_decode($str), utf8_decode('àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ'), 'aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUY');
 }
 ?>
