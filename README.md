@@ -12,6 +12,7 @@ Author
 
 Based in the work of Frédéric Guillot from Mailgun plugin hosted on https://github.com/kanboard/plugin-mailgun
 and the work of polom from kanboard-tasksbymail scripts hosted on https://github.com/polom/kanboard-tasksbymail
+We use https://github.com/tedious/Fetch to handle email
 
 Requirements
 ------------
