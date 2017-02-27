@@ -44,4 +44,4 @@ Testing
 
 You can send a email with this format happykanboard+PROJECTIDENTIFIER@riseup.net put a subject that will be the task title and details in the email body that will be the task content.
 
-You can also send a email with this format in subject: Finish Duke Nukem Forever 2 <PROJECTIDENTIFIER> please! Finish Duke Nukem Forever 2 please! will be the title and details in the email body that will be the task content.
+You can also send a email with this format in subject: Finish Duke Nukem Forever 2 \<PROJECTIDENTIFIER\> please! Finish Duke Nukem Forever 2 please! will be the title and details in the email body that will be the task content.
