@@ -17,7 +17,7 @@ Requirements
 ------------
 
 - Kanboard >= 1.0.33
-- PHP >= 7.0.0
+- PHP 5.6 or >= 7.0.0
 
 Installation
 ------------
