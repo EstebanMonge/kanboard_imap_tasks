@@ -25,6 +25,12 @@
     <?= $this->form->label(t('Guest User ID'), 'imap_guest_user_id') ?>
     <?= $this->form->text('imap_guest_user_id', $values) ?>
 
+    <?= $this->form->label(t('Default priority'), 'imap_default_priority') ?>
+    <?= $this->form->text('imap_default_priority', $values) ?>
+
+    <?= $this->form->label(t('Mail body message'), 'imap_body_message') ?>
+    <?= $this->form->text('imap_body_message', $values) ?>
+
     <div class="form-actions">
         <input type="submit" value="<?= t('Save') ?>" class="btn btn-blue">
     </div>

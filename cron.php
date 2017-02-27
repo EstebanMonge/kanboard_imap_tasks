@@ -15,7 +15,7 @@ $ccaddress="";
 if ( isset($argv[1]) ) {
 	$database=$argv[1];
 	$db = new SQLite3($database);
-	$results = $db->query('SELECT option,value from settings where option IN ("imap_server","imap_username","imap_password","imap_server_port","imap_server_requires_ssl","imap_mail_prefix","api_token","imap_application_url","imap_guest_user_id")');
+	$results = $db->query('SELECT option,value from settings where option IN ("imap_body_message","imap_default_priority","imap_server","imap_username","imap_password","imap_server_port","imap_server_requires_ssl","imap_mail_prefix","api_token","imap_application_url","imap_guest_user_id")');
 	while ($row = $results->fetchArray()) {
 		switch ($row['option']) {
 			case "imap_server":
@@ -45,6 +45,12 @@ if ( isset($argv[1]) ) {
 			case "imap_guest_user_id":
 				$imap_guest_user_id= $row['value'];
 				break;
+			case "imap_default_priority":
+				$default_priority= $row['value'];
+				break;
+			case "imap_body_message":
+				$body_message= $row['value'];
+				break;
 			
 		}
 	}
@@ -68,7 +74,6 @@ if ( isset($argv[1]) ) {
 			$cc = $message->getAddresses("cc");
 			$from = $message->getAddresses("from");
 			$header=$message->getHeaders();
-			echo $header->message_id;
 			if (!isset($cc)) {
 				foreach ($cc as $ccfor) {
 					if ( "$imap_username" != $ccfor['address'] ) {
@@ -112,29 +117,17 @@ if ( isset($argv[1]) ) {
                                                	$project_identifier = $output[1];
 	                                        if (isset($projects[strtoupper($project_identifier)])) {
 	                                                $task['project_id'] = $projects[strtoupper($project_identifier)]['id'];
-#                                	                $subject = 'We created Task ID#'.$task_id;
-#                                        	        $body = 'You can track on Kanboard your request with the Task ID# '.$task_id;
-#                                                	$headers = 'MIME-Version: 1.0' . "\r\n";
-#	                                                $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-#        	                                        $headers .= 'From: '.$imap_username. "\r\n" .
-#                	                                'Reply-To:  <'.$header->to[0]->mailbox.'@'.$header->to[0]->host.'>'. "\r\n" .
-#                        	                        'Subject: '.$subject."\r\n".
-#                                	                'To: '.$to.','.$toaddress."\r\n".
-#		                        		'CC: '.$ccaddress."\r\n".
-#                                        	        'In-Reply-To: <'.$header->message_id.'>'. "\r\n" .
-#                                                	'References: <'.$header->message_id.'>'. "\r\n" .
-#	                                                'X-Mailer: PHP/' . phpversion();
-#        	                                        mail($toaddress,$subject,$body,$headers);
 					}
 				}
                                 $task['title'] = str_replace("<$project_identifier>",'',$message->getSubject());
                                 $task['description'] = $body_text;
+                                $task['priority'] = $default_priority;
                                 $task_id = $client->createTask($task);
 
                                                        $subject = "Re: ".$message->getSubject()." TaskID#[".$task_id."]";
-                                                       $body = 'You can track on Kanboard your request with the Task ID# '.$task_id;
+#                                                       $body = 'You can track on Kanboard your request with the Task ID# '.$task_id;
                                                        $headers = 'MIME-Version: 1.0' . "\r\n";
-                                                       $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+                                                       $headers .= 'Content-type: text/html; charset=UTF-8' . "\r\n";
                                                        $headers .= 'From: '.$imap_username. "\r\n" .
                                                        'Reply-To:  <'.$imap_username.'>'. "\r\n" .
                                                        'Subject: '.$subject."\r\n".
@@ -143,15 +136,11 @@ if ( isset($argv[1]) ) {
                                                        'In-Reply-To: <'.$header->message_id.'>'. "\r\n" .
                                                        'References: <'.$header->message_id.'>'. "\r\n" .
                                                        'X-Mailer: PHP/' . phpversion();
-                                                       mail($toaddress,$subject,$body,$headers);			}
+                                                       mail($toaddress,$subject,$body_message,$headers);			}
 		}
 	}
-#}
 else
 {
 	echo "You must specify the database path\n";
-}
-function stripAccents($str) {
-    return strtr(utf8_decode($str), utf8_decode('àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ'), 'aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUY');
 }
 ?>

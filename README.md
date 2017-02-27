@@ -12,7 +12,6 @@ Author
 
 Based in the work of Frédéric Guillot from Mailgun plugin hosted on https://github.com/kanboard/plugin-mailgun
 and the work of polom from kanboard-tasksbymail scripts hosted on https://github.com/polom/kanboard-tasksbymail
-We use https://github.com/tedious/Fetch to handle email
 
 Requirements
 ------------
@@ -45,4 +44,4 @@ Testing
 
 You can send a email with this format happykanboard+PROJECTIDENTIFIER@riseup.net put a subject that will be the task title and details in the email body that will be the task content.
 
-You can also send a email with this format in subject: Finish Duke Nukem Forever 2 \<PROJECTIDENTIFIER\> please! Finish Duke Nukem Forever 2 please! will be the title and details in the email body that will be the task content.
+You can also send a email with this format in subject: Finish Duke Nukem Forever 2 <PROJECTIDENTIFIER> please! Finish Duke Nukem Forever 2 please! will be the title and details in the email body that will be the task content.
