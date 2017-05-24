@@ -1,4 +1,4 @@
-Tasks Estimated Dates
+Kanboard IMAP Tasks
 =====================
 
 
