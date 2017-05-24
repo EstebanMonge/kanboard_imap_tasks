@@ -68,6 +68,7 @@ if ( isset($argv[1]) ) {
 	$messages = $server->search('UNSEEN');
 		foreach ($messages as $message) {
 			$body_text=$message->getMessageBody();
+			$body_html=$message->getMessageBody($html=true);
                         preg_match('~TaskID#\[(.*?)\]~', $message->getSubject(), $output);
 			$task_id = $output[1];
 			$to = $message->getAddresses("to"); 
@@ -125,7 +126,9 @@ if ( isset($argv[1]) ) {
                                 $task_id = $client->createTask($task);
 
                                                        $subject = "Re: ".$message->getSubject()." TaskID#[".$task_id."]";
-#                                                       $body = 'You can track on Kanboard your request with the Task ID# '.$task_id;
+						       $body_message=str_replace('$task_id',$task_id,$body_message);
+						       $body_message.="<br><br>----- Mensaje Original -----<br><br>";
+						       $body_message.="$body_html";
                                                        $headers = 'MIME-Version: 1.0' . "\r\n";
                                                        $headers .= 'Content-type: text/html; charset=UTF-8' . "\r\n";
                                                        $headers .= 'From: '.$imap_username. "\r\n" .

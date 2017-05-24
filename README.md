@@ -1,5 +1,5 @@
-Kanboard IMAP Tasks
-===================
+Tasks Estimated Dates
+=====================
 
 
 - Create tasks by mails fetched from IMAP
