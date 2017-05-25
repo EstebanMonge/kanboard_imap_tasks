@@ -11,11 +11,13 @@ $tasks = array();
 $jsonrpc_auth_name = "jsonrpc";
 $toaddress="";
 $ccaddress="";
+$comment['content']="";
+$task['description']="";
 
 if ( isset($argv[1]) ) {
 	$database=$argv[1];
 	$db = new SQLite3($database);
-	$results = $db->query('SELECT option,value from settings where option IN ("imap_body_message","imap_default_priority","imap_server","imap_username","imap_password","imap_server_port","imap_server_requires_ssl","imap_mail_prefix","api_token","imap_application_url","imap_guest_user_id")');
+	$results = $db->query('SELECT option,value from settings where option IN ("imap_body_message","imap_default_priority","imap_server","imap_username","imap_password","imap_server_port","imap_server_requires_ssl","imap_mail_prefix","api_token","imap_application_url","imap_guest_user_id","imap_task_description_message")');
 	while ($row = $results->fetchArray()) {
 		switch ($row['option']) {
 			case "imap_server":
@@ -50,6 +52,9 @@ if ( isset($argv[1]) ) {
 				break;
 			case "imap_body_message":
 				$body_message= $row['value'];
+				break;
+			case "imap_task_description_message":
+				$task_description_message= $row['value'];
 				break;
 			
 		}
@@ -89,19 +94,21 @@ if ( isset($argv[1]) ) {
 				}
 			}
 			$toaddress=substr_replace($toaddress, "", -1);
+			$comment['user_id'] = $imap_guest_user_id; 
+			$task['creator_id'] = $imap_guest_user_id; 
+                        foreach ($users_tmp as $user) {
+                        	if ( strtolower($user['email']) == strtolower($from['address']) ){
+                                	$comment['user_id'] = $user['id'];
+					$task['creator_id'] = $user['id'];
+                                }
+                       }
+                       if ( $comment['user_id']==$imap_guest_user_id && $imap_guest_user_id != "" ) {
+                                        $comment['content'].="From: ".strtolower($from['address'])."\r\n";
+                                        $task['description'].="From: ".strtolower($from['address'])."\r\n";
+                       }
+
 			if ( $client->getTask($task_id) ) {
-				$comment['content']="";
 				$comment['task_id']=$task_id;
-				$comment['user_id'] = "none"; 
-        			foreach ($users_tmp as $user) {
-                			if ( strtolower($user['email']) == $to ){
-                        			$comment['user_id'] = $user['id'];
-                			}
-        			}
-				if ( $comment['user_id']=="none" && $imap_guest_user_id != "" ) {
-					$comment['user_id'] = $imap_guest_user_id;
-					$comment['content'].="From: ".$from['address']."\r\n";
-				}
 				$comment['content'].=$body_text;
 				$response=$client->createComment($comment);	
 			}
@@ -121,25 +128,26 @@ if ( isset($argv[1]) ) {
 					}
 				}
                                 $task['title'] = str_replace("<$project_identifier>",'',$message->getSubject());
-                                $task['description'] = $body_text;
+				$task['description'] .= "\r\n".$task_description_message."\r\n";
+				$task['description'] .= $body_text;
                                 $task['priority'] = $default_priority;
                                 $task_id = $client->createTask($task);
 
-                                                       $subject = "Re: ".$message->getSubject()." TaskID#[".$task_id."]";
-						       $body_message=str_replace('$task_id',$task_id,$body_message);
-						       $body_message.="<br><br>----- Mensaje Original -----<br><br>";
-						       $body_message.="$body_html";
-                                                       $headers = 'MIME-Version: 1.0' . "\r\n";
-                                                       $headers .= 'Content-type: text/html; charset=UTF-8' . "\r\n";
-                                                       $headers .= 'From: '.$imap_username. "\r\n" .
-                                                       'Reply-To:  <'.$imap_username.'>'. "\r\n" .
-                                                       'Subject: '.$subject."\r\n".
-                                                       'To: '.$from['address']."\r\n".
-                                                       'CC: '.$toaddress.','.$ccaddress."\r\n".
-                                                       'In-Reply-To: <'.$header->message_id.'>'. "\r\n" .
-                                                       'References: <'.$header->message_id.'>'. "\r\n" .
-                                                       'X-Mailer: PHP/' . phpversion();
-                                                       mail($toaddress,$subject,$body_message,$headers);			}
+                                $subject = "Re: ".$message->getSubject()." TaskID#[".$task_id."]";
+			        $body_message=str_replace('$task_id',$task_id,$body_message);
+  			        $body_message.="<br><br>----- Mensaje Original -----<br><br>";
+			        $body_message.="$body_html";
+                                $headers = 'MIME-Version: 1.0' . "\r\n";
+                                $headers .= 'Content-type: text/html; charset=UTF-8' . "\r\n";
+                                $headers .= 'From: '.$imap_username. "\r\n" .
+                                'Reply-To:  <'.$imap_username.'>'. "\r\n" .
+                                'Subject: '.$subject."\r\n".
+                                'To: '.$from['address']."\r\n".
+                                'CC: '.$toaddress.','.$ccaddress."\r\n".
+                                'In-Reply-To: <'.$header->message_id.'>'. "\r\n" .
+                                'References: <'.$header->message_id.'>'. "\r\n" .
+                                'X-Mailer: PHP/' . phpversion();
+                                mail($toaddress,$subject,$body_message,$headers);			}
 		}
 	}
 else

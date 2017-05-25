@@ -31,6 +31,9 @@
     <?= $this->form->label(t('Mail body message'), 'imap_body_message') ?>
     <?= $this->form->text('imap_body_message', $values) ?>
 
+    <?= $this->form->label(t('Task description message'), 'imap_task_description_message') ?>
+    <?= $this->form->text('imap_task_description_message', $values) ?>
+
     <div class="form-actions">
         <input type="submit" value="<?= t('Save') ?>" class="btn btn-blue">
     </div>
