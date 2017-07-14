@@ -80,11 +80,9 @@ if ( isset($argv[1]) ) {
 			$cc = $message->getAddresses("cc");
 			$from = $message->getAddresses("from");
 			$header=$message->getHeaders();
-			if (!isset($cc)) {
-				foreach ($cc as $ccfor) {
-					if ( "$imap_username" != $ccfor['address'] ) {
-						$ccaddress .= $ccfor['address'].",";
-					}
+			foreach ($cc as $ccfor) {
+				if ( "$imap_username" != $ccfor['address'] ) {
+					$ccaddress .= $ccfor['address'].",";
 				}
 			}
 			$ccaddress=substr_replace($ccaddress, "", -1);
@@ -136,6 +134,9 @@ if ( isset($argv[1]) ) {
                                 $subject = "Re: ".$message->getSubject()." TaskID#[".$task_id."]";
 			        $body_message=str_replace('$task_id',$task_id,$body_message);
   			        $body_message.="<br><br>----- Mensaje Original -----<br><br>";
+				$body_message.="From: ".$from['address']."\n";
+				$body_message.="To: ".$toaddress."\n";
+				$body_message.="Cc: ".$ccaddress."\n";
 			        $body_message.="$body_html";
                                 $headers = 'MIME-Version: 1.0' . "\r\n";
                                 $headers .= 'Content-type: text/html; charset=UTF-8' . "\r\n";
