@@ -1,3 +1,5 @@
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FEstebanMonge%2Fkanboard_imap_tasks.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FEstebanMonge%2Fkanboard_imap_tasks?ref=badge_shield)
+
 Kanboard IMAP Tasks
 =====================
 
@@ -45,3 +47,7 @@ Testing
 You can send a email with this format happykanboard+PROJECTIDENTIFIER@riseup.net put a subject that will be the task title and details in the email body that will be the task content.
 
 You can also send a email with this format in subject: Finish Duke Nukem Forever 2 \<PROJECTIDENTIFIER\> please! Finish Duke Nukem Forever 2 please! will be the title and details in the email body that will be the task content.
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FEstebanMonge%2Fkanboard_imap_tasks.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2FEstebanMonge%2Fkanboard_imap_tasks?ref=badge_large)
