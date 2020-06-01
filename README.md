@@ -2,7 +2,7 @@ Kanboard IMAP Tasks
 =====================
 
 
-- Create tasks by mails fetched from IMAP
+- Create tasks by email fetched from IMAP
 
 Author
 ------
@@ -37,11 +37,11 @@ Configuration
 -------------
 
 Go to Kanboard -> Settings -> Integrations
-Go to Kanboard -> Project -> Menu -> Settings -> Edit project and add a Identifier
+Go to Kanboard -> Project -> Menu -> Settings -> Edit project and add an Identifier
 
 Testing
 -------
 
-You can send a email with this format happykanboard+PROJECTIDENTIFIER@riseup.net put a subject that will be the task title and details in the email body that will be the task content.
+You can send an email with the format _happykanboard+PROJECTIDENTIFIER@riseup.net_. The email subject will become the task title, and the email body that will become the task content.
 
-You can also send a email with this format in subject: Finish Duke Nukem Forever 2 \<PROJECTIDENTIFIER\> please! Finish Duke Nukem Forever 2 please! will be the title and details in the email body that will be the task content.
+You can also send an email with this format in subject: _Finish Duke Nukem Forever 2 \<PROJECTIDENTIFIER\> please!_ The task title will be "Finish Duke Nukem Forever 2 please!", and details in the email body that will be the task content.
