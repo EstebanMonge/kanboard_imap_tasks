@@ -17,6 +17,7 @@ class Plugin extends Base
     public function initialize()
     {
         $this->template->hook->attach('template:config:integrations', 'imap:integration');
+        $this->hook->on('template:layout:js', array('template' => 'plugins/Imap/Asset/integration.js'));
     }
 
     public function onStartup()
@@ -36,7 +37,7 @@ class Plugin extends Base
 
     public function getPluginVersion()
     {
-        return '0.0.1';
+        return '0.0.2';
     }
 
     public function getPluginHomepage()
